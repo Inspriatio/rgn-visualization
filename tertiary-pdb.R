@@ -1,11 +1,6 @@
-# Convert a tertiary prediction from RGN into PDB file format
-# Aleix Lafita - October 2019
-
 library(argparse)
 suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(seqinr))
-
-###################### Argparse #############################
 
 tertiary.in = "C:/Users/xuyang/Desktop/1/1sa1/1sa1_Predicted.tertiary"
 fasta.in = "C:/Users/xuyang/Desktop/1/1sa1/1sa1.fasta"
@@ -54,8 +49,6 @@ aa.codes = c(
   "Y" = "Tyr"
 ) %>% toupper()
 
-############################# File parsing ###############################
-
 # Parse the protein sequence and convert to DF
 seq = read.fasta(fasta.in)
 
@@ -83,8 +76,6 @@ if(seqlen.fasta != seqlen.pdb)
   stop(sprintf("Sequence length in FASTA (%i) different than in tertiary (%i)", seqlen.fasta, seqlen.pdb))
 
 seqlen = seqlen.fasta
-
-############################# Convert ####################################
 
 coords.mat = t(coords)
 
