@@ -6,11 +6,11 @@ tertiary.in = "C:/Users/xuyang/Desktop/1/1sa1/1sa1_Predicted.tertiary"
 fasta.in = "C:/Users/xuyang/Desktop/1/1sa1/1sa1.fasta"
 pdb.out = "C:/Users/xuyang/Desktop/1/1sa1/1sa1_Predicted.pdb"
 
-# create parser object
+# 创建解析器
 parser = ArgumentParser(
   description='Convert a tertiary prediction from RGN into a PDB file')
 
-# specify our desired options 
+# 整合信息 
 parser$add_argument("-t", "--tertiary", default=tertiary.in,
                     help="Coordinates from RGN for protein structure [default \"%(default)s\"]")
 parser$add_argument("-f", "--fasta", default=fasta.in,
@@ -18,10 +18,9 @@ parser$add_argument("-f", "--fasta", default=fasta.in,
 parser$add_argument("-p", "--pdb", default=pdb.out,
                     help="Name of the output pdb formatted coordinates [default \"%(default)s\"]")
 
-# get command line options, if help option encountered print help and exit,
-# otherwise if options not found on command line then set defaults, 
+# 解析
 args = parser$parse_args()
-
+# 设置氨基酸信息参照点
 tertiary.in = args$tertiary
 fasta.in = args$fasta
 pdb.out = args$pdb
@@ -49,7 +48,7 @@ aa.codes = c(
   "Y" = "Tyr"
 ) %>% toupper()
 
-# Parse the protein sequence and convert to DF
+# 解析蛋白质序列
 seq = read.fasta(fasta.in)
 
 seqlen.fasta = length(getSequence(seq)[[1]])
@@ -60,7 +59,7 @@ seq.df = data.frame(
   stringsAsFactors = F
 ) 
 
-# Parse the tertiary coordinates
+# 对结构坐标进行整合
 coords = read.csv(
   tertiary.in,
   sep = "",
@@ -71,7 +70,7 @@ coords = read.csv(
 
 seqlen.pdb = ncol(coords) / 3
 
-# Stop if the length of the sequence is different than the tertiary
+# 判断序列格式
 if(seqlen.fasta != seqlen.pdb) 
   stop(sprintf("Sequence length in FASTA (%i) different than in tertiary (%i)", seqlen.fasta, seqlen.pdb))
 
@@ -107,13 +106,11 @@ pdb.df = as.data.frame(coords.mat) %>%
     bfac = "  0.00",
     atomtype = rep(c("N", "C", "C"), seqlen)
   ) 
-
-# Include the sequence information from FASTA file
 pdb.resn = merge(pdb.df, seq.df, by.x = "resid", by.y = "pos") %>%
   rowwise() %>%
   mutate(resn = aa.codes[seq])
 
-# Combine all info into PDB format lines
+# 输出PDB格式
 pdb.pdbrec = pdb.resn %>%
   rowwise() %>%
   mutate(
@@ -140,8 +137,6 @@ pdb.pdbrec = pdb.resn %>%
       "  "
     )
   )
-
-# Write the output file
 write.table(
   pdb.pdbrec %>% select(pdbrec),
   pdb.out,
